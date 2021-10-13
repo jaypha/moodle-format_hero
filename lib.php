@@ -248,7 +248,7 @@ class format_hero extends format_base {
                     'type' => PARAM_TEXT,
                 ),
                 'sectiontext1_editor' => array(
-                    'default' => array('text' => '', 'format' => 1),
+                    'default' => '',
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
@@ -261,7 +261,7 @@ class format_hero extends format_base {
                     'type' => PARAM_TEXT,
                 ),
                 'sectiontext2_editor' => array(
-                    'default' => array('text' => '', 'format' => 1),
+                    'default' => '',
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
@@ -274,7 +274,7 @@ class format_hero extends format_base {
                     'type' => PARAM_TEXT,
                 ),
                 'sectiontext3_editor' => array(
-                    'default' => array('text' => '', 'format' => 1),
+                    'default' => '',
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
@@ -287,7 +287,7 @@ class format_hero extends format_base {
                     'type' => PARAM_TEXT,
                 ),
                 'sectiontext4_editor' => array(
-                    'default' => array('text' => '', 'format' => 1),
+                    'default' => '',
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
@@ -300,7 +300,7 @@ class format_hero extends format_base {
                     'type' => PARAM_TEXT,
                 ),
                 'sectiontext5_editor' => array(
-                    'default' => array('text' => '', 'format' => 1),
+                    'default' => '',
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
