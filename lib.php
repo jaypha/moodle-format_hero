@@ -247,8 +247,8 @@ class format_hero extends format_base {
                     'default' => '',
                     'type' => PARAM_TEXT,
                 ),
-                'sectiontext1' => array(
-                    'default' => '',
+                'sectiontext1_editor' => array(
+                    'default' => array('text' => '', 'format' => 1),
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
@@ -260,8 +260,8 @@ class format_hero extends format_base {
                     'default' => '',
                     'type' => PARAM_TEXT,
                 ),
-                'sectiontext2' => array(
-                    'default' => '',
+                'sectiontext2_editor' => array(
+                    'default' => array('text' => '', 'format' => 1),
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
@@ -273,8 +273,8 @@ class format_hero extends format_base {
                     'default' => '',
                     'type' => PARAM_TEXT,
                 ),
-                'sectiontext3' => array(
-                    'default' => '',
+                'sectiontext3_editor' => array(
+                    'default' => array('text' => '', 'format' => 1),
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
@@ -286,8 +286,8 @@ class format_hero extends format_base {
                     'default' => '',
                     'type' => PARAM_TEXT,
                 ),
-                'sectiontext4' => array(
-                    'default' => '',
+                'sectiontext4_editor' => array(
+                    'default' => array('text' => '', 'format' => 1),
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
@@ -299,8 +299,8 @@ class format_hero extends format_base {
                     'default' => '',
                     'type' => PARAM_TEXT,
                 ),
-                'sectiontext5' => array(
-                    'default' => '',
+                'sectiontext5_editor' => array(
+                    'default' => array('text' => '', 'format' => 1),
                     'type' => PARAM_RAW,
                     'element' => 'editor'
                 ),
@@ -318,7 +318,7 @@ class format_hero extends format_base {
                 ),
             );
         }
-        if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
+        if ($foreditform && !isset($courseformatoptions['hiddensections']['label'])) {
             $courseformatoptionsedit = array(
                 'hiddensections' => array(
                     'label' => new lang_string('hiddensections'),
@@ -358,7 +358,7 @@ class format_hero extends format_base {
                     'help' => 'sectionheading1',
                     'help_component' => 'format_hero',
                 ),
-                'sectiontext1' => array(
+                'sectiontext1_editor' => array(
                     'label' => get_string('sectiontext1_label', 'format_hero'),
                     'element_type' => 'editor',
                     'help' => 'sectiontext1',
@@ -381,7 +381,7 @@ class format_hero extends format_base {
                     'help' => 'sectionheading2',
                     'help_component' => 'format_hero',
                 ),
-                'sectiontext2' => array(
+                'sectiontext2_editor' => array(
                     'label' => get_string('sectiontext2_label', 'format_hero'),
                     'element_type' => 'editor',
                     'help' => 'sectiontext2',
@@ -404,7 +404,7 @@ class format_hero extends format_base {
                     'help' => 'sectionheading3',
                     'help_component' => 'format_hero',
                 ),
-                'sectiontext3' => array(
+                'sectiontext3_editor' => array(
                     'label' => get_string('sectiontext3_label', 'format_hero'),
                     'element_type' => 'editor',
                     'help' => 'sectiontext3',
@@ -427,7 +427,7 @@ class format_hero extends format_base {
                     'help' => 'sectionheading4',
                     'help_component' => 'format_hero',
                 ),
-                'sectiontext4' => array(
+                'sectiontext4_editor' => array(
                     'label' => get_string('sectiontext4_label', 'format_hero'),
                     'element_type' => 'editor',
                     'help' => 'sectiontext4',
@@ -450,7 +450,7 @@ class format_hero extends format_base {
                     'help' => 'sectionheading5',
                     'help_component' => 'format_hero',
                 ),
-                'sectiontext5' => array(
+                'sectiontext5_editor' => array(
                     'label' => get_string('sectiontext5_label', 'format_hero'),
                     'element_type' => 'editor',
                     'help' => 'sectiontext5',
@@ -545,118 +545,6 @@ class format_hero extends format_base {
         return $this->update_format_options($data);
     }
 
-    /**
-     * Prepares values of course or section format options before storing them in DB
-     *
-     * If an option has invalid value it is not returned
-     *
-     * @param array $rawdata associative array of the proposed course/section format options
-     * @param int|null $sectionid null if it is course format option
-     * @return array array of options that have valid values
-     */
-    protected function validate_format_options(array $rawdata, int $sectionid = null) : array {
-        if (!$sectionid) {
-            $allformatoptions = $this->course_format_options(true);
-        } else {
-            $allformatoptions = $this->section_format_options(true);
-        }
-        $data = array_intersect_key($rawdata, $allformatoptions);
-
-        foreach ($data as $key => $value) {
-            $option = $allformatoptions[$key] + ['type' => PARAM_RAW, 'element_type' => null, 'element_attributes' => [[]]];
-            if (is_array($value)) {
-                $cleanedarray = clean_param_array($value, $option['type']);
-                $data[$key] = json_encode($cleanedarray);
-            } else {
-                $data[$key] = clean_param($value, $option['type']);
-            }
-
-            if ($option['element_type'] === 'select' && !array_key_exists($data[$key], $option['element_attributes'][0])) {
-                // Value invalid for select element, skip.
-                unset($data[$key]);
-            }
-        }
-        return $data;
-    }
-
-    /**
-     * Returns the format options stored for this course or course section
-     *
-     * When overriding please note that this function is called from rebuild_course_cache()
-     * and section_info object, therefore using of get_fast_modinfo() and/or any function that
-     * accesses it may lead to recursion.
-     *
-     * @param null|int|stdClass|section_info $section if null the course format options will be returned
-     *     otherwise options for specified section will be returned. This can be either
-     *     section object or relative section number (field course_sections.section)
-     * @return array
-     */
-    public function get_format_options($section = null) {
-        global $DB;
-
-        if ($section === null) {
-            $options = $this->course_format_options();
-        } else {
-            $options = $this->section_format_options();
-        }
-
-        if (empty($options)) {
-            // There are no option for course/sections anyway, no need to go further.
-            return array();
-        }
-        if ($section === null) {
-            // Course format options will be returned.
-            $sectionid = 0;
-        } else if ($this->courseid && isset($section->id)) {
-            // Course section format options will be returned.
-            $sectionid = $section->id;
-        } else if ($this->courseid && is_int($section) &&
-            ($sectionobj = $DB->get_record('course_sections',
-                array('section' => $section, 'course' => $this->courseid), 'id'))) {
-                    // Course section format options will be returned.
-                    $sectionid = $sectionobj->id;
-        } else {
-            // Non-existing (yet) section was passed as an argument,
-            // default format options for course section will be returned.
-            $sectionid = -1;
-        }
-        if (!array_key_exists($sectionid, $this->formatoptions)) {
-            $this->formatoptions[$sectionid] = array();
-            // First fill with default values.
-            foreach ($options as $optionname => $optionparams) {
-                $this->formatoptions[$sectionid][$optionname] = null;
-                if (array_key_exists('default', $optionparams)) {
-                    $this->formatoptions[$sectionid][$optionname] = $optionparams['default'];
-                }
-            }
-            if ($this->courseid && $sectionid !== -1) {
-                // Overwrite the default options values with those stored in course_format_options table.
-                // Nothing can be stored if we are interested in generic course ($this->courseid == 0)
-                // or generic section ($sectionid === 0).
-                $records = $DB->get_records('course_format_options',
-                    array('courseid' => $this->courseid,
-                          'format' => $this->format,
-                          'sectionid' => $sectionid
-                          ), '', 'id,name,value');
-                foreach ($records as $record) {
-                    if (array_key_exists($record->name, $this->formatoptions[$sectionid])) {
-                        $value = $record->value;
-                        if ($value !== null && isset($options[$record->name]['type'])) {
-                            // This will convert string value to number if needed.
-                            $value = clean_param($value, $options[$record->name]['type']);
-                        }
-
-                        if (!empty($options[$record->name]['element']) && $options[$record->name]['element'] === 'editor') {
-                            $this->formatoptions[$sectionid][$record->name] = json_decode($value, true);
-                        } else {
-                            $this->formatoptions[$sectionid][$record->name] = $value;
-                        }
-                    }
-                }
-            }
-        }
-        return $this->formatoptions[$sectionid];
-    }
     /**
      * Whether this format allows to delete sections.
      *
